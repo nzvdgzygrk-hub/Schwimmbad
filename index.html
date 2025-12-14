@@ -8,35 +8,36 @@
 <style>
 body {
     font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-    margin: 10px;
     background: #f9f9f9;
+    margin: 10px;
 }
-h1 {
+h1, h2 {
     text-align: center;
 }
 .counter {
-    text-align: center;
     font-size: 22px;
     font-weight: bold;
-    margin: 15px 0;
+    text-align: center;
+    margin: 10px 0;
 }
 .warning {
     color: red;
-    text-align: center;
     font-weight: bold;
+    text-align: center;
     display: none;
     margin-bottom: 10px;
 }
-.list {
+.section {
     background: #fff;
     border-radius: 12px;
     padding: 10px;
+    margin-bottom: 15px;
 }
 .kid {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 14px;
+    padding: 12px;
     border-bottom: 1px solid #ddd;
     font-size: 18px;
 }
@@ -47,12 +48,19 @@ input[type="checkbox"] {
     width: 26px;
     height: 26px;
 }
-.rules {
-    margin-top: 20px;
-    background: #fff;
-    border-radius: 12px;
-    padding: 12px;
-    font-size: 16px;
+.time-row {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    font-size: 18px;
+}
+.time-row:last-child {
+    border-bottom: none;
+}
+.time {
+    width: 80px;
+    font-weight: bold;
 }
 </style>
 </head>
@@ -69,38 +77,48 @@ Anwesende Kinder: <span id="count">0</span>
 ⚠️ Mindestens 2 Kinder müssen anwesend sein!
 </div>
 
-<div class="list" id="kids"></div>
+<div class="section">
+<h2>Kinder anwesend</h2>
+<div id="kids"></div>
+</div>
 
-<div class="rules">
-<strong>Wichtige Regeln:</strong>
+<div class="section">
+<h2>Checkliste (10:00 – 18:00)</h2>
+<div id="times"></div>
+</div>
+
+<div class="section">
+<h2>Wichtige Regeln</h2>
 <ul>
     <li>❗ Kein Kind geht allein ins Wasser</li>
     <li>👫 Mindestens 2 Kinder bleiben immer zusammen</li>
-    <li>🚫 Nicht rennen</li>
-    <li>👀 Kinder müssen sichtbar sein</li>
-    <li>📢 Anweisungen sofort befolgen</li>
+    <li>🚫 Nicht rennen – Rutschgefahr</li>
+    <li>👀 Kinder müssen jederzeit sichtbar sein</li>
+    <li>📢 Anweisungen der Betreuer & Bademeister sofort befolgen</li>
     <li>⏰ Kontrolle alle 30 Minuten</li>
 </ul>
 </div>
 
 <script>
+// Kinderliste
 const kids = [
 "Aos","Ahmet","Efe","David","Kiril","Semih","Jonas","Jannik",
 "Julian","Elias","Mario","Flitzer","Paul","Noel","Piot","Malik"
 ];
 
-const container = document.getElementById("kids");
+const kidContainer = document.getElementById("kids");
 
 kids.forEach(name => {
-    const row = document.createElement("div");
-    row.className = "kid";
-    row.innerHTML = `
+    const div = document.createElement("div");
+    div.className = "kid";
+    div.innerHTML = `
         <span>${name}</span>
         <input type="checkbox" class="kidCheck">
     `;
-    container.appendChild(row);
+    kidContainer.appendChild(div);
 });
 
+// Zähler + Warnung
 function updateCount() {
     const checks = document.querySelectorAll(".kidCheck");
     let count = 0;
@@ -110,6 +128,25 @@ function updateCount() {
 }
 
 document.addEventListener("change", updateCount);
+
+// Zeiten 10:00 – 18:00
+const times = [
+"10:00","10:30","11:00","11:30","12:00","12:30",
+"13:00","13:30","14:00","14:30","15:00","15:30",
+"16:00","16:30","17:00","17:30","18:00"
+];
+
+const timeContainer = document.getElementById("times");
+
+times.forEach(t => {
+    const row = document.createElement("div");
+    row.className = "time-row";
+    row.innerHTML = `
+        <div class="time">${t}</div>
+        <input type="checkbox">
+    `;
+    timeContainer.appendChild(row);
+});
 
 // Erinnerung alle 30 Minuten (nur wenn Seite offen ist)
 setInterval(() => {

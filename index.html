@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Schwimmbad Kontrolle</title>
+<title>Schwimmbad Aufsicht & Protokoll</title>
 
 <style>
 body {
     font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-    background: #f4f4f4;
+    background: #f2f2f2;
     margin: 10px;
 }
 h1, h2 {
@@ -20,12 +20,6 @@ h1, h2 {
     padding: 10px;
     margin-bottom: 15px;
 }
-.time {
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 8px;
-    text-align: center;
-}
 .kid {
     display: flex;
     justify-content: space-between;
@@ -34,37 +28,56 @@ h1, h2 {
     border-bottom: 1px solid #ddd;
     font-size: 18px;
 }
-.kid:last-child {
-    border-bottom: none;
+.kid:last-child { border-bottom: none; }
+input[type="checkbox"] { width: 26px; height: 26px; }
+.time {
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    margin: 10px 0;
 }
-input[type="checkbox"] {
-    width: 26px;
-    height: 26px;
+.counter {
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
 }
-.rules {
+.car {
     font-size: 16px;
+    margin-bottom: 6px;
+}
+button {
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    border-radius: 10px;
+    border: none;
+    background: #007aff;
+    color: white;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🏊 Schwimmbad Kontrolle</h1>
-<h2>Alle 30 Minuten abhaken</h2>
+<h1>🏊 Schwimmbad Aufsicht</h1>
 
-<div id="checklists"></div>
-
-<div class="section rules">
-<strong>Wichtige Regeln:</strong>
-<ul>
-    <li>❗ Kein Kind geht allein ins Wasser</li>
-    <li>👫 Mindestens 2 Kinder müssen immer zusammen sein</li>
-    <li>🚫 Nicht rennen – Rutschgefahr</li>
-    <li>👀 Kinder müssen jederzeit sichtbar sein</li>
-    <li>📢 Anweisungen der Betreuer & Bademeister sofort befolgen</li>
-    <li>⏰ Kontrolle alle 30 Minuten verpflichtend</li>
-</ul>
+<!-- KINDER AUSWAHL -->
+<div class="section">
+<h2>Kinder dabei</h2>
+<div class="counter">Anzahl: <span id="totalCount">0</span></div>
+<div id="kidSelect"></div>
 </div>
+
+<!-- MITFAHRLISTE -->
+<div class="section">
+<h2>🚗 Mitfahrliste</h2>
+<button onclick="generateCars()">Namen verteilen</button>
+<div id="cars"></div>
+</div>
+
+<!-- CHECKLISTEN -->
+<div id="checklists"></div>
 
 <script>
 const kids = [
@@ -78,31 +91,92 @@ const times = [
 "16:00","16:30","17:00","17:30","18:00"
 ];
 
-const container = document.getElementById("checklists");
+const storageKey = "schwimmbadFinal";
+const data = JSON.parse(localStorage.getItem(storageKey)) || { selected: {}, checks: {} };
 
-times.forEach(time => {
-    const section = document.createElement("div");
-    section.className = "section";
+// KID AUSWAHL
+const selectDiv = document.getElementById("kidSelect");
 
-    let html = `<div class="time">${time}</div>`;
-
-    kids.forEach(kid => {
-        html += `
-            <div class="kid">
-                <span>${kid}</span>
-                <input type="checkbox">
-            </div>
-        `;
-    });
-
-    section.innerHTML = html;
-    container.appendChild(section);
+kids.forEach(kid => {
+    const checked = data.selected[kid] ? "checked" : "";
+    selectDiv.innerHTML += `
+        <div class="kid">
+            <span>${kid}</span>
+            <input type="checkbox" ${checked}
+                onchange="toggleKid('${kid}',this.checked)">
+        </div>
+    `;
 });
 
-// Erinnerung alle 30 Minuten (nur solange Seite offen ist)
-setInterval(() => {
-    alert("⏰ Kontrolle: Alle Kinder jetzt abhaken!");
-}, 30 * 60 * 1000);
+function toggleKid(kid,val){
+    data.selected[kid]=val;
+    localStorage.setItem(storageKey,JSON.stringify(data));
+    render();
+}
+
+// CHECKLISTEN
+function render(){
+    document.getElementById("totalCount").innerText =
+        Object.values(data.selected).filter(v=>v).length;
+
+    const container = document.getElementById("checklists");
+    container.innerHTML="";
+
+    times.forEach(time=>{
+        const sec=document.createElement("div");
+        sec.className="section";
+        let html=`<div class="time">${time}</div>`;
+
+        kids.filter(k=>data.selected[k]).forEach(kid=>{
+            const checked = data.checks?.[time]?.[kid] ? "checked" : "";
+            html+=`
+            <div class="kid">
+                <span>${kid}</span>
+                <input type="checkbox" ${checked}
+                onchange="saveCheck('${time}','${kid}',this.checked)">
+            </div>`;
+        });
+
+        sec.innerHTML=html;
+        container.appendChild(sec);
+    });
+
+    localStorage.setItem(storageKey,JSON.stringify(data));
+}
+
+function saveCheck(time,kid,val){
+    if(!data.checks[time]) data.checks[time]={};
+    data.checks[time][kid]=val;
+    localStorage.setItem(storageKey,JSON.stringify(data));
+}
+
+// MITFAHRLISTE
+function generateCars(){
+    const active = kids.filter(k=>data.selected[k]);
+    let car1=["Efe"];
+    let car2=["Jannik","Julian"];
+    let car3=["Jonas"];
+
+    active.forEach(k=>{
+        if(!car1.includes(k) && !car2.includes(k) && !car3.includes(k)){
+            const min = [car1,car2,car3].sort((a,b)=>a.length-b.length)[0];
+            min.push(k);
+        }
+    });
+
+    document.getElementById("cars").innerHTML=`
+        <div class="car"><strong>Auto Efe:</strong> ${car1.join(", ")}</div>
+        <div class="car"><strong>Auto Jannik & Julian:</strong> ${car2.join(", ")}</div>
+        <div class="car"><strong>Auto Jonas:</strong> ${car3.join(", ")}</div>
+    `;
+}
+
+render();
+
+// Erinnerung (nur wenn offen)
+setInterval(()=>{
+    alert("⏰ Kontrolle: Kinder abhaken!");
+},30*60*1000);
 </script>
 
 </body>

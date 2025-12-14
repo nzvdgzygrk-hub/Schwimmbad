@@ -3,29 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Schwimmbad Aufsicht</title>
+<title>Schwimmbad Kontrolle</title>
 
 <style>
 body {
     font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-    background: #f9f9f9;
+    background: #f4f4f4;
     margin: 10px;
 }
 h1, h2 {
     text-align: center;
-}
-.counter {
-    font-size: 22px;
-    font-weight: bold;
-    text-align: center;
-    margin: 10px 0;
-}
-.warning {
-    color: red;
-    font-weight: bold;
-    text-align: center;
-    display: none;
-    margin-bottom: 10px;
 }
 .section {
     background: #fff;
@@ -33,11 +20,17 @@ h1, h2 {
     padding: 10px;
     margin-bottom: 15px;
 }
+.time {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    text-align: center;
+}
 .kid {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px;
+    padding: 10px;
     border-bottom: 1px solid #ddd;
     font-size: 18px;
 }
@@ -48,109 +41,67 @@ input[type="checkbox"] {
     width: 26px;
     height: 26px;
 }
-.time-row {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    font-size: 18px;
-}
-.time-row:last-child {
-    border-bottom: none;
-}
-.time {
-    width: 80px;
-    font-weight: bold;
+.rules {
+    font-size: 16px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🏊 Schwimmbad Aufsicht</h1>
+<h1>🏊 Schwimmbad Kontrolle</h1>
+<h2>Alle 30 Minuten abhaken</h2>
 
-<div class="counter">
-Anwesende Kinder: <span id="count">0</span>
-</div>
+<div id="checklists"></div>
 
-<div id="warn" class="warning">
-⚠️ Mindestens 2 Kinder müssen anwesend sein!
-</div>
-
-<div class="section">
-<h2>Kinder anwesend</h2>
-<div id="kids"></div>
-</div>
-
-<div class="section">
-<h2>Checkliste (10:00 – 18:00)</h2>
-<div id="times"></div>
-</div>
-
-<div class="section">
-<h2>Wichtige Regeln</h2>
+<div class="section rules">
+<strong>Wichtige Regeln:</strong>
 <ul>
     <li>❗ Kein Kind geht allein ins Wasser</li>
-    <li>👫 Mindestens 2 Kinder bleiben immer zusammen</li>
+    <li>👫 Mindestens 2 Kinder müssen immer zusammen sein</li>
     <li>🚫 Nicht rennen – Rutschgefahr</li>
     <li>👀 Kinder müssen jederzeit sichtbar sein</li>
     <li>📢 Anweisungen der Betreuer & Bademeister sofort befolgen</li>
-    <li>⏰ Kontrolle alle 30 Minuten</li>
+    <li>⏰ Kontrolle alle 30 Minuten verpflichtend</li>
 </ul>
 </div>
 
 <script>
-// Kinderliste
 const kids = [
 "Aos","Ahmet","Efe","David","Kiril","Semih","Jonas","Jannik",
 "Julian","Elias","Mario","Flitzer","Paul","Noel","Piot","Malik"
 ];
 
-const kidContainer = document.getElementById("kids");
-
-kids.forEach(name => {
-    const div = document.createElement("div");
-    div.className = "kid";
-    div.innerHTML = `
-        <span>${name}</span>
-        <input type="checkbox" class="kidCheck">
-    `;
-    kidContainer.appendChild(div);
-});
-
-// Zähler + Warnung
-function updateCount() {
-    const checks = document.querySelectorAll(".kidCheck");
-    let count = 0;
-    checks.forEach(c => { if (c.checked) count++; });
-    document.getElementById("count").innerText = count;
-    document.getElementById("warn").style.display = count < 2 ? "block" : "none";
-}
-
-document.addEventListener("change", updateCount);
-
-// Zeiten 10:00 – 18:00
 const times = [
 "10:00","10:30","11:00","11:30","12:00","12:30",
 "13:00","13:30","14:00","14:30","15:00","15:30",
 "16:00","16:30","17:00","17:30","18:00"
 ];
 
-const timeContainer = document.getElementById("times");
+const container = document.getElementById("checklists");
 
-times.forEach(t => {
-    const row = document.createElement("div");
-    row.className = "time-row";
-    row.innerHTML = `
-        <div class="time">${t}</div>
-        <input type="checkbox">
-    `;
-    timeContainer.appendChild(row);
+times.forEach(time => {
+    const section = document.createElement("div");
+    section.className = "section";
+
+    let html = `<div class="time">${time}</div>`;
+
+    kids.forEach(kid => {
+        html += `
+            <div class="kid">
+                <span>${kid}</span>
+                <input type="checkbox">
+            </div>
+        `;
+    });
+
+    section.innerHTML = html;
+    container.appendChild(section);
 });
 
-// Erinnerung alle 30 Minuten (nur wenn Seite offen ist)
+// Erinnerung alle 30 Minuten (nur solange Seite offen ist)
 setInterval(() => {
-    alert("⏰ Erinnerung: Kinder im Schwimmbad kontrollieren!");
+    alert("⏰ Kontrolle: Alle Kinder jetzt abhaken!");
 }, 30 * 60 * 1000);
 </script>
 
